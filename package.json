@@ -55,10 +55,9 @@
     "xpath": "^0.0.34",
     "zod": "^3.24.1"
   },
-  "packageManager": "pnpm@9.15.0",
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/coverage-v8": "^2.1.9",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
@@ -66,9 +65,18 @@
   "vitest": {
     "coverage": {
       "provider": "v8",
-      "reporter": ["text", "lcov"],
-      "include": ["src/**/*.ts"],
-      "exclude": ["src/**/*.spec.ts", "src/index.ts", "src/cli.ts"]
+      "reporter": [
+        "text",
+        "lcov"
+      ],
+      "include": [
+        "src/**/*.ts"
+      ],
+      "exclude": [
+        "src/**/*.spec.ts",
+        "src/index.ts",
+        "src/cli.ts"
+      ]
     }
   },
   "optionalDependencies": {
