@@ -1,6 +1,6 @@
 {
   "name": "lims-mcp",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Locator Intelligence MCP Server — web-first AI locator generation, healing, and Playwright framework sync for Cursor.",
   "type": "module",
   "main": "dist/index.js",

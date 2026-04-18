@@ -7,6 +7,30 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.3] — 2026-04-18
+
+**First npm update after 0.1.0** — all changes since the initial `npm publish` are included in this release.
+
+### Fixed
+
+- **Health check** — When `LIMS_PLAYWRIGHT_MCP_COMMAND` is a bare binary (e.g. `playwright-mcp`) that is not installed globally, the error message now tells users to use `npx` with `@playwright/mcp@latest` (or pin the same version as Cursor). `health_check` also returns `playwrightMcpArgs` and `playwrightMcpUrl` in the `config` object.
+
+### Changed
+
+- **Documentation defaults** — Every README / integration guide example now uses `npx` + `@playwright/mcp@latest` instead of the bare `playwright-mcp` binary, because most machines do not have a global install.
+
+### Added
+
+- **README** — New section “Using LIMS with Your Playwright Framework” with step-by-step paths for `specs/`, `pages/`, `locators/`, and the `sync_playwright_framework` parameters.
+
+### Other (from earlier commits in this release)
+
+- Node 20+ is the supported minimum (Node 18 is not supported — MCP SDK / `File` API).
+- CI: `npm ci` + tests on Node 20 and 22.
+- `playwrightMcpConfigured` in health check now true when `LIMS_PLAYWRIGHT_MCP_URL` is set.
+
+---
+
 ## [0.1.2] — 2026-04-18
 
 ### Fixed
