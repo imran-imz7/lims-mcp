@@ -4,6 +4,16 @@ The simplest reference for daily use of LIMS in Cursor.
 
 ---
 
+## Requirements
+
+| Requirement | Minimum |
+|---|---|
+| Node.js | **18.0+** (18, 20, or 22 — all tested in CI) |
+| Cursor | Any version with MCP support |
+| Playwright MCP | Optional — LIMS falls back to local DOM mode without it |
+
+---
+
 ## What LIMS Does
 
 LIMS (Locator Intelligence MCP Server) wraps the entire locator lifecycle:

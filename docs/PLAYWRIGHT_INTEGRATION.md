@@ -4,6 +4,8 @@ LIMS is designed to work best with Playwright on web projects.
 This document describes every Playwright-related configuration option,
 the exact priority order for runtime modes, and the env-var reference.
 
+**Node.js compatibility:** LIMS requires **Node 18+**. Tested in CI on Node 18.x, 20.x, and 22.x.
+
 ---
 
 ## What Playwright Is Used For
@@ -116,10 +118,43 @@ path was used.
 
 ---
 
-## Recommended Setup: Two-Process (default)
+## Recommended Setup: npx (easiest — works on any machine, Node 18+)
 
-Both Cursor and LIMS run their own independent stdio playwright-mcp subprocesses.
-This is the simplest setup — no manual server management required.
+No clone or build needed. Works on **Node 18, 20, or 22**.
+
+`~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "Playwright": {
+      "command": "playwright-mcp",
+      "args": ["--headless", "--isolated"]
+    },
+    "LIMS": {
+      "command": "npx",
+      "args": ["-y", "lims-mcp"],
+      "env": {
+        "LIMS_PLAYWRIGHT_MCP_COMMAND":      "playwright-mcp",
+        "LIMS_PLAYWRIGHT_MCP_ARGS":         "[\"--headless\",\"--isolated\"]",
+        "LIMS_PLAYWRIGHT_AUTO_BRIDGE":      "false",
+        "LIMS_LEARNING_ENABLED":            "true",
+        "LIMS_ARTIFACTS_ENABLED":           "true",
+        "LIMS_ARTIFACTS_DIR":               "/Users/<your-username>/.lims/artifacts",
+        "LIMS_PLAYWRIGHT_MCP_TIMEOUT_MS":   "10000",
+        "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+      }
+    }
+  }
+}
+```
+
+> Replace `<your-username>` with your actual system username.
+
+---
+
+## Recommended Setup: Two-Process Local Build (for development)
+
+Clone the repo, build locally, then point Cursor at the built CLI.
 
 `~/.cursor/mcp.json`:
 ```json
@@ -131,14 +166,14 @@ This is the simplest setup — no manual server management required.
     },
     "LIMS": {
       "command": "node",
-      "args": ["/path/to/locator_mcp/dist/cli.js"],
+      "args": ["/absolute/path/to/lims-mcp/dist/cli.js"],
       "env": {
         "LIMS_PLAYWRIGHT_MCP_COMMAND": "playwright-mcp",
         "LIMS_PLAYWRIGHT_MCP_ARGS": "[\"--headless\",\"--isolated\"]",
         "LIMS_PLAYWRIGHT_AUTO_BRIDGE": "false",
         "LIMS_LEARNING_ENABLED": "true",
         "LIMS_ARTIFACTS_ENABLED": "true",
-        "LIMS_ARTIFACTS_DIR": "/path/to/locator_mcp/.lims/artifacts",
+        "LIMS_ARTIFACTS_DIR": "/absolute/path/to/lims-mcp/.lims/artifacts",
         "LIMS_PLAYWRIGHT_MCP_TIMEOUT_MS": "10000",
         "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
       }
@@ -166,8 +201,8 @@ playwright-mcp --port 8931 --headless
       "url": "http://localhost:8931"
     },
     "LIMS": {
-      "command": "node",
-      "args": ["/path/to/locator_mcp/dist/cli.js"],
+      "command": "npx",
+      "args": ["-y", "lims-mcp"],
       "env": {
         "LIMS_PLAYWRIGHT_MCP_URL": "http://localhost:8931",
         "LIMS_LEARNING_ENABLED": "true",

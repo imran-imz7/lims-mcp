@@ -4,7 +4,7 @@
 
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](#)
 [![Tests](https://img.shields.io/badge/tests-67%20passing-brightgreen)](#)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-blue)](#)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#)
 [![MCP](https://img.shields.io/badge/protocol-MCP-purple)](#)
 
@@ -59,29 +59,9 @@ LIMS:     captures DOM + screenshot
 
 ## ⚡ Quick Start
 
-### 1 — Install and build
+### Option A — Use via npx (recommended — no clone needed)
 
-```bash
-git clone https://github.com/imran-imz7/locator-intelligence-mcp
-cd locator-intelligence-mcp
-
-npm install
-npm run build   # compiles TypeScript → dist/
-npm test        # runs 67 tests — all should pass
-```
-
-**Browser install (optional — only needed for local Playwright capture):**
-
-```bash
-npx playwright install chromium
-```
-
-> If you are using `LIMS_PLAYWRIGHT_MCP_COMMAND` (subprocess mode) or `LIMS_PLAYWRIGHT_MCP_URL` (HTTP mode), LIMS uses the external `playwright-mcp` binary for its browser and you do **not** need to install Chromium separately. You can also suppress any automatic browser download during `npm install` with:
-> ```bash
-> PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
-> ```
-
-### 2 — Connect to Cursor
+The easiest way on any machine. Works on **Node 18, 20, or 22**.
 
 Add to `~/.cursor/mcp.json`:
 
@@ -93,23 +73,55 @@ Add to `~/.cursor/mcp.json`:
       "args": ["--headless", "--isolated"]
     },
     "LIMS": {
-      "command": "node",
-      "args": ["/absolute/path/to/lims-mcp/dist/cli.js"],
+      "command": "npx",
+      "args": ["-y", "lims-mcp"],
       "env": {
-        "LIMS_PLAYWRIGHT_MCP_COMMAND": "playwright-mcp",
-        "LIMS_PLAYWRIGHT_MCP_ARGS":    "[\"--headless\", \"--isolated\"]",
-        "LIMS_PLAYWRIGHT_AUTO_BRIDGE": "false",
-        "LIMS_LEARNING_ENABLED":       "true",
-        "LIMS_ARTIFACTS_ENABLED":      "true",
-        "LIMS_ARTIFACTS_DIR":          "/absolute/path/to/lims-mcp/.lims/artifacts",
-        "LIMS_PLAYWRIGHT_MCP_TIMEOUT_MS": "10000"
+        "LIMS_PLAYWRIGHT_MCP_COMMAND":    "playwright-mcp",
+        "LIMS_PLAYWRIGHT_MCP_ARGS":       "[\"--headless\", \"--isolated\"]",
+        "LIMS_PLAYWRIGHT_AUTO_BRIDGE":    "false",
+        "LIMS_LEARNING_ENABLED":          "true",
+        "LIMS_ARTIFACTS_ENABLED":         "true",
+        "LIMS_ARTIFACTS_DIR":             "/Users/<your-username>/.lims/artifacts",
+        "LIMS_PLAYWRIGHT_MCP_TIMEOUT_MS": "10000",
+        "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
       }
     }
   }
 }
 ```
 
-> Playwright MCP requires `npm install -g @playwright/mcp`. If you skip it, LIMS still works — it falls back to local DOM mode automatically.
+> Replace `<your-username>` with your system username. Playwright MCP requires `npm install -g @playwright/mcp`. If you skip it, LIMS falls back to local DOM mode automatically.
+
+### Option B — Clone and build locally (for development / contribution)
+
+```bash
+git clone https://github.com/imran-imz7/lims-mcp
+cd lims-mcp
+
+npm install
+npm run build   # compiles TypeScript → dist/
+npm test        # runs 67 tests — all should pass
+```
+
+Then in `~/.cursor/mcp.json` use the local build:
+
+```json
+{
+  "mcpServers": {
+    "LIMS": {
+      "command": "node",
+      "args": ["/absolute/path/to/lims-mcp/dist/cli.js"],
+      "env": {
+        "LIMS_PLAYWRIGHT_MCP_COMMAND": "playwright-mcp",
+        "LIMS_PLAYWRIGHT_MCP_ARGS":    "[\"--headless\", \"--isolated\"]",
+        "LIMS_LEARNING_ENABLED":       "true",
+        "LIMS_ARTIFACTS_ENABLED":      "true",
+        "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+      }
+    }
+  }
+}
+```
 
 ### 3 — Restart Cursor and use it
 

@@ -7,6 +7,21 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.1] — 2026-04-18
+
+### Fixed
+
+- **Node 18 compatibility** — `engines.node` relaxed from `>=20` to `>=18`. All APIs used (`fetch`, `node:crypto`, `node:` imports, ES2022 target) are available in Node 18.0+.
+- **CI matrix** — Added Node 18.x to GitHub Actions build-and-test matrix (now runs on 18.x, 20.x, 22.x).
+- **`@vitest/coverage-v8` version** — Downgraded from `4.x` to `2.x` to match `vitest@2.x`. The major version mismatch caused `npm ci` to fail in CI with a peer dependency error.
+- **`packageManager` field removed** — Removed `"packageManager": "pnpm@9.15.0"` from `package.json` to prevent npm CI environments from treating the project as pnpm-only.
+- **README Quick Start** — Updated primary setup to use `npx lims-mcp` (no clone required). Local build instructions preserved as Option B. Fixed placeholder path `/absolute/path/to/lims-mcp/dist/cli.js` that caused `MODULE_NOT_FOUND` errors on other machines.
+- **Package renamed** — `locator-intelligence-mcp-server` → `lims-mcp`. Single bin alias `lims-mcp` retained.
+- **Docs updated** — All five docs (`WORKFLOW_DIAGRAM`, `API_SPEC`, `ARCHITECTURE`, `MCP_WORKING_GUIDE`, `PLAYWRIGHT_INTEGRATION`) rewritten to reflect current implementation: exact function call order, 3 runtime modes with priority, similarity scoring weights, confidence fusion formula, artifact/learning store data flow, `LIMS_ACTIVE` marker, `mergeGeneratedBlock` rules.
+- **Mermaid diagrams** — Added architecture flowchart and two sequence diagrams to `README.md` for direct rendering on GitHub.
+
+---
+
 ## [0.1.0] — 2026-04-18
 
 First public release.
@@ -61,7 +76,7 @@ First public release.
 - `docs/WORKFLOW_DIAGRAM.md` — Mermaid sequence diagrams
 
 **CI**
-- GitHub Actions workflow: builds and runs tests on Node 20 and 22
+- GitHub Actions workflow: builds and runs tests on Node 20 and 22 (extended to 18, 20, 22 in v0.1.1)
 
 ### Technical notes
 
