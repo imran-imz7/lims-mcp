@@ -4,7 +4,7 @@
 
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](#)
 [![Tests](https://img.shields.io/badge/tests-67%20passing-brightgreen)](#)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-blue)](#)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#)
 [![MCP](https://img.shields.io/badge/protocol-MCP-purple)](#)
 
@@ -61,7 +61,7 @@ LIMS:     captures DOM + screenshot
 
 ### Option A — Use via npx (recommended — no clone needed)
 
-The easiest way on any machine. Works on **Node 18, 20, or 22**.
+The easiest way on any machine. Requires **Node 20 or 22**.
 
 Add to `~/.cursor/mcp.json`:
 

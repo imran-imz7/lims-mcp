@@ -7,6 +7,18 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.2] — 2026-04-18
+
+### Fixed
+
+- **Node 20 minimum restored** — Node 18 support was added in v0.1.1 but is not viable.
+  `@modelcontextprotocol/sdk@1.12.x` depends on `undici` which references the `File` Web API
+  (`ReferenceError: File is not defined`). `File` was only added as a Node.js global in Node 20.
+  `engines.node` is back to `">=20"` and Node 18.x removed from the CI matrix.
+  The other machine failing with Node 18.20.6 must be upgraded to Node 20+.
+
+---
+
 ## [0.1.1] — 2026-04-18
 
 ### Fixed

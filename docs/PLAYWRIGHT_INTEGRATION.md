@@ -4,7 +4,8 @@ LIMS is designed to work best with Playwright on web projects.
 This document describes every Playwright-related configuration option,
 the exact priority order for runtime modes, and the env-var reference.
 
-**Node.js compatibility:** LIMS requires **Node 18+**. Tested in CI on Node 18.x, 20.x, and 22.x.
+**Node.js compatibility:** LIMS requires **Node 20+**. Tested in CI on Node 20.x and 22.x.
+Node 18 is not supported — `@modelcontextprotocol/sdk` depends on `undici` which requires the `File` Web API, only available from Node 20 onwards.
 
 ---
 
@@ -118,9 +119,9 @@ path was used.
 
 ---
 
-## Recommended Setup: npx (easiest — works on any machine, Node 18+)
+## Recommended Setup: npx (easiest — works on any machine, Node 20+)
 
-No clone or build needed. Works on **Node 18, 20, or 22**.
+No clone or build needed. Works on **Node 20 or 22**.
 
 `~/.cursor/mcp.json`:
 ```json

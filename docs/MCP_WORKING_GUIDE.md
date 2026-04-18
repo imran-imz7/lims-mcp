@@ -8,7 +8,7 @@ The simplest reference for daily use of LIMS in Cursor.
 
 | Requirement | Minimum |
 |---|---|
-| Node.js | **18.0+** (18, 20, or 22 — all tested in CI) |
+| Node.js | **20+** (20 or 22 — tested in CI; Node 18 is not supported due to `@modelcontextprotocol/sdk` requiring the `File` Web API which Node 18 does not have) |
 | Cursor | Any version with MCP support |
 | Playwright MCP | Optional — LIMS falls back to local DOM mode without it |
 
