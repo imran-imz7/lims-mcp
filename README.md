@@ -121,41 +121,112 @@ Add to `~/.cursor/mcp.json`:
 
 ## 🏗 Architecture
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│                         CURSOR AI AGENT                            │
-│  You describe elements → Agent calls LIMS tools → Gets locators    │
-└────────────┬──────────────────────────────────────┬───────────────┘
-             │ MCP calls                            │ MCP calls
-             ▼                                      ▼
-  ┌─────────────────────┐               ┌──────────────────────────┐
-  │   Playwright MCP    │               │          LIMS            │
-  │  (agent's browser)  │               │  (locator intelligence)  │
-  │                     │               │                          │
-  │  browser_navigate   │               │  generate_locator        │
-  │  browser_snapshot   │               │  heal_locator            │
-  │  browser_screenshot │               │  sync_playwright_        │
-  │  browser_click      │               │    framework             │
-  │                     │               │  analyze_dom             │
-  └─────────────────────┘               │  report_locator_result   │
-                                        │  capture_generate_       │
-                                        │    locator               │
-                                        │  health_check            │
-                                        └──────────┬───────────────┘
-                                                   │ internal
-                                                   ▼
-                                        ┌──────────────────────────┐
-                                        │  LIMS internal layers    │
-                                        │                          │
-                                        │  mcp/         ← schemas  │
-                                        │  application/ ← usecases │
-                                        │  domain/      ← engines  │
-                                        │  infra/       ← storage  │
-                                        │  integrations/← browser  │
-                                        └──────────────────────────┘
+```mermaid
+flowchart LR
+    U["You / Tester"]
+    C["Cursor AI Agent"]
+    PW["Playwright MCP\n(Cursor's — browser control)"]
+    L["LIMS MCP Server"]
+    LP["LIMS internal\nplaywright-mcp\n(validation only)"]
+    AF[".lims/artifacts/\n{ref}.json per element"]
+    LS[".lims/locator-learning.json\nmax 1000 records"]
+    FS["Framework Files\nfeature.locator.ts\nfeature.page.ts\nfeature.spec.ts"]
+
+    U  -->|"plain language prompts"| C
+    C  -->|"browser_navigate\nbrowser_snapshot"| PW
+    PW -->|"DOM + accessibility tree"| C
+    C  -->|"MCP tool calls"| L
+
+    L  -->|"browser_run_code\n(validate + capture)"| LP
+    LP -->|"runtime results\ncaptured page data"| L
+
+    L  --> AF
+    L  --> LS
+    AF -->|"fingerprint reuse\nfor healing"| L
+    LS -->|"ranking bias\npreferred/failed/healed"| L
+
+    L  -->|"write / merge\ninside lims blocks"| FS
+    FS -->|"playwright test run"| PW
+    PW -->|"pass / fail"| C
+    C  -->|"report_locator_result"| L
 ```
 
-**Key rule:** Playwright MCP and LIMS are isolated processes. They cannot call each other. The Cursor agent bridges them. LIMS has its own internal playwright-mcp subprocess for locator validation — completely separate from Cursor's Playwright MCP.
+> **Key rule:** Playwright MCP (Cursor's) and LIMS are isolated MCP processes — the Cursor agent bridges them. LIMS has its own **separate** internal playwright-mcp subprocess for locator validation only.
+
+---
+
+## 🔄 How It Works — Full Workflow
+
+### Step 1 — Capture & Generate
+
+```mermaid
+sequenceDiagram
+    actor U  as "You / Tester"
+    participant C  as "Cursor AI Agent"
+    participant L  as "LIMS MCP Server"
+    participant PW as "Playwright MCP (Cursor's)"
+    participant LP as "LIMS Internal playwright-mcp"
+    participant S  as ".lims/ Store"
+    participant FS as "Framework Files on Disk"
+
+    U  ->> C : Describe the element to test
+    C  ->> PW : browser_navigate(pageUrl)
+    PW -->> C : page loaded
+    C  ->> PW : browser_snapshot()
+    PW -->> C : DOM + accessibility tree
+    C  ->> L  : generate_locator(dom, target, platform)
+
+    Note over L: Schema validation → LocatorEngine.generate<br/>Tier 1: data-testid / data-test / data-qa<br/>Tier 2: aria-label / role / getByRole<br/>Tier 3: id / name (non-dynamic only)<br/>Tier 4: placeholder / label[for]<br/>Tier 5: visible static text<br/>Tier 6: relative (near/above/below)<br/>Tier 7: XPath fallback<br/>Tier 8: class (last resort)
+
+    L  ->> L  : UniquenessEngine — reject if ≠ 1 match
+    L  ->> L  : RankingEngine — score each candidate
+    L  ->> LP : validate top 8 candidates live in browser
+    LP -->> L : executed / unique / visible / interactable
+    L  ->> L  : ConfidenceFusionEngine.fuse<br/>dom×0.50 + visual×0.20 + runtime×0.30
+    L  ->> S  : saveArtifact → .lims/artifacts/{ref}.json
+    L  -->> C : bestLocator + confidence + fallbacks + locatorCatalog
+
+    C  ->> L  : sync_playwright_framework(feature, locatorBindings, testCases)
+    L  ->> FS : write feature.locator.ts
+    L  ->> FS : write feature.page.ts
+    L  ->> FS : write feature.spec.ts
+    L  -->> C : written file paths
+```
+
+### Step 2 — Test, Feedback & Self-Healing
+
+```mermaid
+sequenceDiagram
+    actor U  as "You / Tester"
+    participant C  as "Cursor AI Agent"
+    participant PW as "Playwright Test Runner"
+    participant L  as "LIMS MCP Server"
+    participant LP as "LIMS Internal playwright-mcp"
+    participant S  as ".lims/ Store"
+    participant FS as "Framework Files on Disk"
+
+    U  ->> PW : npx playwright test feature.spec.ts
+    PW -->> C : pass OR fail + error message
+    C  ->> L  : report_locator_result(locator, status, artifactRef)
+    L  ->> S  : appendOutcome + recordOutcome in learning store
+
+    alt status = "passed"
+        L  -->> C : learned:true ✓
+    else status = "failed" → self-heal
+        L  ->> S  : load original fingerprint + DOM from artifact
+        L  ->> LP : capture current page DOM
+        LP -->> L : fresh DOM
+        L  ->> L  : SimilarityEngine.bestMatch<br/>tag×0.12 + text×0.28 + attrs×0.35 + hierarchy×0.25
+        L  ->> L  : LocatorEngine.generate on matched node
+        L  ->> LP : validate healed locator live
+        LP -->> L : runtime result
+        L  ->> S  : appendOutcome(healed) + recordOutcome(healed)
+        L  -->> C : healedLocator + confidence + diff + explanation
+        C  ->> L  : sync_playwright_framework (healed locator)
+        L  ->> FS : update feature.locator.ts
+        L  -->> C : written ✓
+    end
+```
 
 ---
 
