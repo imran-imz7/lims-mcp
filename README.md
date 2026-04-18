@@ -25,7 +25,8 @@
 | 9 | [Customisation Guide](#-customisation-guide) | Where to change configs, priorities, thresholds |
 | 10 | [Runtime Modes](#-runtime-modes) | Playwright MCP subprocess vs HTTP vs standalone |
 | 11 | [Platform Support](#-platform-support) | Web, Android, iOS |
-| 12 | [Documentation Index](#-documentation-index) | All docs with descriptions |
+| 12 | [Using LIMS with Your Framework](#-using-lims-with-your-playwright-framework) | Step-by-step guide with real paths |
+| 13 | [Documentation Index](#-documentation-index) | All docs with descriptions |
 
 ---
 
@@ -707,6 +708,114 @@ If playwright-mcp is configured but unreachable (not installed, crashed, timeout
 | [docs/WORKFLOW_DIAGRAM.md](docs/WORKFLOW_DIAGRAM.md) | Mermaid sequence diagrams of capture → generate → sync → heal |
 | [docs/MCP_WORKING_GUIDE.md](docs/MCP_WORKING_GUIDE.md) | Quick daily reference — which tool to call when |
 | [docs/PLAYWRIGHT_INTEGRATION.md](docs/PLAYWRIGHT_INTEGRATION.md) | Playwright MCP configuration and integration details |
+
+---
+
+## 🚀 Using LIMS with Your Playwright Framework
+
+This section shows how to use LIMS inside an existing Playwright JS/TS project to generate locators and write framework files directly into your folder structure.
+
+### Step 1 — Confirm LIMS is active
+
+In Cursor chat, type:
+
+```
+Call health_check on LIMS
+```
+
+You must see `"status": "LIMS_ACTIVE"` before doing anything else. If you don't — fully quit Cursor (Cmd+Q / Alt+F4) and reopen it.
+
+---
+
+### Step 2 — Generate a locator and write files to your framework
+
+Paste this prompt in Cursor chat (fill in your values):
+
+```
+Use LIMS for my Playwright JS automation framework.
+
+Step 1: browser_navigate to https://your-app.com/page
+Step 2: browser_snapshot to capture the DOM
+Step 3: call generate_locator with the captured DOM, platform "web", 
+        target "<describe the element, e.g. Login button>"
+Step 4: call sync_playwright_framework with:
+  feature: "login"
+  language: "js"
+  outputDir: "/absolute/path/to/your-framework/tests"
+  specDir: "specs"
+  pageDir: "pages"
+  locatorDir: "locators"
+  pageUrl: "https://your-app.com/page"
+  testCases: ["User can log in with valid credentials"]
+```
+
+**LIMS will create exactly these files:**
+
+```
+tests/
+├── locators/
+│   └── login.locator.js    ← generated selectors
+├── pages/
+│   └── login.page.js       ← page object with methods
+└── specs/
+    └── login.spec.js       ← ready-to-run test
+```
+
+---
+
+### Step 3 — Run your tests
+
+```bash
+npx playwright test tests/specs/login.spec.js
+```
+
+---
+
+### Step 4 — Report result back to LIMS (closes the learning loop)
+
+```
+Call report_locator_result on LIMS:
+  locator: "<bestLocator from Step 3 response>"
+  status: "passed"
+  platform: "web"
+  artifactRef: "<ref returned by LIMS in Step 3>"
+```
+
+If the test **failed** — LIMS automatically heals the locator, regenerates it,
+and updates the file. You just re-run the test.
+
+---
+
+### `sync_playwright_framework` — Path Parameters Reference
+
+| Parameter | What it controls | Example |
+|---|---|---|
+| `outputDir` | Root of your framework | `/Users/you/my-framework/tests` |
+| `specDir` | Sub-folder for spec files | `specs` |
+| `pageDir` | Sub-folder for page objects | `pages` |
+| `locatorDir` | Sub-folder for locator files | `locators` |
+| `language` | `"js"` or `"ts"` | `"js"` |
+| `feature` | Base name for all three files | `"login"` → `login.spec.js` etc. |
+
+All three directories are created automatically if they don't exist.
+Custom code you add **outside** the `<lims:spec>` / `<lims:page>` / `<lims:locator>` markers
+is never overwritten on re-sync.
+
+---
+
+### Node.js Version Requirement
+
+```bash
+node --version   # must be v20.x.x or v22.x.x
+```
+
+> LIMS depends on `@modelcontextprotocol/sdk` which uses the `File` Web API.  
+> This API is only available in Node 20+. Node 18 is **not** supported.
+
+If you are on Node 18:
+```bash
+nvm install 20 && nvm use 20 && nvm alias default 20
+```
 
 ---
 
