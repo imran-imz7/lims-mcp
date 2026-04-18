@@ -1,0 +1,26 @@
+flowchart LR
+    U["User / Tester"]
+    C["Cursor AI<br/>IDE"]
+    P["Playwright<br/>MCP Server"]
+    L["Locator Intelligence<br/>MCP Server"]
+    A["Web Automation<br/>Framework"]
+    AF["Artifact Store<br/>.lims/artifacts"]
+    LF["Learning Store<br/>.lims/locator-learning.json"]
+
+    U -->|"feature test cases, prompts"| C
+    C -->|"MCP tool calls"| L
+    C -->|"runs / edits tests"| A
+
+    L -->|"live capture + runtime validation"| P
+    P -->|"browser DOM, screenshot, runtime signals"| L
+
+    L -->|"generate / heal / sync framework files"| A
+    A -->|"Playwright test execution"| P
+    P -->|"execution result"| A
+    A -->|"pass/fail outcome"| C
+    C -->|"report_locator_result"| L
+
+    L --> AF
+    L --> LF
+    AF -->|"artifactRef reuse"| L
+    LF -->|"ranking bias + self-improvement"| L

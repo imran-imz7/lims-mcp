@@ -1,0 +1,86 @@
+{
+  "name": "lims-mcp",
+  "version": "0.1.0",
+  "description": "Locator Intelligence MCP Server — web-first AI locator generation, healing, and Playwright framework sync for Cursor.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "lims-mcp": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs/ARCHITECTURE.md",
+    "docs/API_SPEC.md",
+    "docs/MCP_WORKING_GUIDE.md",
+    "docs/PLAYWRIGHT_INTEGRATION.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/index.ts",
+    "prepack": "npm run build",
+    "lint:typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "mcp",
+    "locator",
+    "playwright",
+    "automation",
+    "healing",
+    "cursor",
+    "testing",
+    "page-object",
+    "self-healing"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@xmldom/xmldom": "^0.8.10",
+    "cheerio": "^1.0.0",
+    "fast-xml-parser": "^4.5.0",
+    "pino": "^9.6.0",
+    "uuid": "^11.0.5",
+    "xpath": "^0.0.34",
+    "zod": "^3.24.1"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^4.1.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "vitest": {
+    "coverage": {
+      "provider": "v8",
+      "reporter": ["text", "lcov"],
+      "include": ["src/**/*.ts"],
+      "exclude": ["src/**/*.spec.ts", "src/index.ts", "src/cli.ts"]
+    }
+  },
+  "optionalDependencies": {
+    "playwright": "^1.55.0"
+  },
+  "author": "Imran",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imran-imz7/lims-mcp.git"
+  },
+  "homepage": "https://github.com/imran-imz7/lims-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/imran-imz7/lims-mcp/issues"
+  }
+}

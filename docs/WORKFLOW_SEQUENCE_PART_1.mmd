@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor U as "User / Tester"
+    participant C as "Cursor AI<br/>IDE"
+    participant L as "Locator Intelligence<br/>MCP Server"
+    participant P as "Playwright<br/>MCP Server"
+    participant S as "Artifact Store<br/>and Learning Store"
+    participant A as "Web Automation<br/>Framework"
+
+    U->>C: 1. Share feature<br/>test case
+    C->>L: 2. Call MCP tool<br/>capture_generate_locator
+
+    alt "Playwright MCP Server supports browser_run_code"
+        L->>P: 3. Request live<br/>page capture
+        P-->>L: 4. Return dom,<br/>screenshotBase64,<br/>targetDescriptor
+    else "Fallback local Playwright capture"
+        L->>L: 3. Run<br/>PlaywrightWebCaptureAdapter.capture()
+    end
+
+    L->>L: 5. Run<br/>LocatorGenerationService.generate()
+    L->>P: 6. Validate best locator<br/>at runtime
+    P-->>L: 7. Return runtime<br/>validation result
+    L->>S: 8. Save artifact with<br/>LocatorArtifactStore.saveArtifact()
+    L-->>C: 9. Return bestLocator,<br/>fallbacks, artifactRef
+
+    C->>L: 10. Call MCP tool<br/>sync_playwright_framework
+    L->>S: 11. Load artifact with<br/>LocatorArtifactStore.getArtifact()
+    L->>A: 12. Write feature.locator.*
+    L->>A: 13. Write feature.page.*
+    L->>A: 14. Write feature.spec.*
+    L-->>C: 15. Return written<br/>file paths

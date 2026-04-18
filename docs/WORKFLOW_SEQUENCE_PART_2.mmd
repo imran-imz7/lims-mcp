@@ -1,0 +1,28 @@
+sequenceDiagram
+    actor U as "User / Tester"
+    participant C as "Cursor AI<br/>IDE"
+    participant A as "Web Automation<br/>Framework"
+    participant P as "Playwright<br/>MCP Server"
+    participant L as "Locator Intelligence<br/>MCP Server"
+    participant S as "Artifact Store<br/>and Learning Store"
+
+    U->>A: 16. Run Playwright<br/>test suite
+    A->>P: 17. Execute web<br/>automation
+    P-->>A: 18. Return test result
+    A-->>C: 19. Report pass or fail
+
+    C->>L: 20. Call MCP tool<br/>report_locator_result
+    L->>S: 21. Record learning with<br/>LocatorLearningStore.recordOutcome()
+
+    alt "Locator failed"
+        L->>S: 22. Load artifact with<br/>LocatorArtifactStore.getArtifact()
+        L->>L: 23. Run LocatorHealingService.heal()<br/>or regenerate locator
+        L->>P: 24. Revalidate<br/>improved locator
+        P-->>L: 25. Return revalidation<br/>result
+        L->>S: 26. Save healed mapping with<br/>LocatorArtifactStore.appendOutcome()
+        L-->>C: 27. Return<br/>improved.locator
+        C->>L: 28. Call MCP tool<br/>sync_playwright_framework
+        L->>A: 29. Update framework files
+    else "Locator passed"
+        L-->>C: 22. Save success<br/>signal only
+    end

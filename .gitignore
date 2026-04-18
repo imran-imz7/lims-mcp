@@ -1,0 +1,41 @@
+node_modules/
+dist/
+*.log
+.env
+.env.local
+.DS_Store
+coverage/
+*.tsbuildinfo
+
+# Env / secrets (keep only explicit example files in git)
+.env.*
+!.env.example
+
+# Package manager / debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test / coverage artifacts
+test-results/
+playwright-report/
+.nyc_output/
+
+# Local editor / IDE state
+.cursor/
+.vscode/
+.idea/
+
+# Local runtime/cache/temp artifacts
+.cache/
+.lims/
+.playwright-mcp/
+tmp/
+temp/
+*.pid
+*.seed
+*.pid.lock
+
+# OS artifacts
+Thumbs.db
