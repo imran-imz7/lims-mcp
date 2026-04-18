@@ -6,8 +6,10 @@ export interface AppConfig {
   cacheMaxEntries: number
   playwrightValidatorUrl?: string
   // Playwright MCP — three mutually exclusive connection modes (priority: url > command > none)
-  playwrightMcpUrl?: string      // HTTP/SSE: connect to a shared running playwright-mcp server
-  playwrightMcpCommand?: string  // stdio: LIMS spawns its own playwright-mcp subprocess
+  playwrightMcpUrl?: string      // HTTP/SSE: connect to a shared running playwright-mcp server (e.g. http://localhost:8931)
+  playwrightMcpCommand?: string  // stdio: command to spawn playwright-mcp subprocess
+                                 // Use "npx" (not bare "playwright-mcp") unless globally installed.
+                                 // Example: command="npx", args=["-y","@playwright/mcp@latest"]
   playwrightMcpArgs: string[]
   playwrightMcpEnv?: Record<string, string>
   playwrightMcpCwd?: string

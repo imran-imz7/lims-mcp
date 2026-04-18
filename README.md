@@ -70,15 +70,15 @@ Add to `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "Playwright": {
-      "command": "playwright-mcp",
-      "args": ["--headless", "--isolated"]
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
     },
     "LIMS": {
       "command": "npx",
       "args": ["-y", "lims-mcp"],
       "env": {
-        "LIMS_PLAYWRIGHT_MCP_COMMAND":    "playwright-mcp",
-        "LIMS_PLAYWRIGHT_MCP_ARGS":       "[\"--headless\", \"--isolated\"]",
+        "LIMS_PLAYWRIGHT_MCP_COMMAND":    "npx",
+        "LIMS_PLAYWRIGHT_MCP_ARGS":       "[\"-y\", \"@playwright/mcp@latest\"]",
         "LIMS_PLAYWRIGHT_AUTO_BRIDGE":    "false",
         "LIMS_LEARNING_ENABLED":          "true",
         "LIMS_ARTIFACTS_ENABLED":         "true",
@@ -113,8 +113,8 @@ Then in `~/.cursor/mcp.json` use the local build:
       "command": "node",
       "args": ["/absolute/path/to/lims-mcp/dist/cli.js"],
       "env": {
-        "LIMS_PLAYWRIGHT_MCP_COMMAND": "playwright-mcp",
-        "LIMS_PLAYWRIGHT_MCP_ARGS":    "[\"--headless\", \"--isolated\"]",
+        "LIMS_PLAYWRIGHT_MCP_COMMAND": "npx",
+        "LIMS_PLAYWRIGHT_MCP_ARGS":    "[\"-y\", \"@playwright/mcp@latest\"]",
         "LIMS_LEARNING_ENABLED":       "true",
         "LIMS_ARTIFACTS_ENABLED":      "true",
         "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
@@ -670,12 +670,13 @@ LIMS picks a runtime validation mode automatically based on what is configured. 
 │ Pri │ Mode                         │ How to activate                               │
 ├─────┼──────────────────────────────┼───────────────────────────────────────────────┤
 │  1  │ HTTP — shared server         │ Set LIMS_PLAYWRIGHT_MCP_URL                   │
-│     │ One browser for Cursor+LIMS  │ Run: playwright-mcp --headless --port 8931    │
+│     │ One browser for Cursor+LIMS  │ Run: npx @playwright/mcp --headless --port 8931│
 │     │ Most efficient               │ Cursor: { "url": "http://localhost:8931/mcp" }│
 ├─────┼──────────────────────────────┼───────────────────────────────────────────────┤
-│  2  │ stdio — LIMS subprocess      │ Set LIMS_PLAYWRIGHT_MCP_COMMAND               │
-│     │ LIMS owns its browser        │ playwright-mcp must be installed globally      │
-│     │ Fully self-contained         │ npm install -g @playwright/mcp                │
+│  2  │ stdio — LIMS subprocess      │ Set LIMS_PLAYWRIGHT_MCP_COMMAND="npx"         │
+│     │ LIMS owns its browser        │ LIMS_PLAYWRIGHT_MCP_ARGS='["-y",              │
+│     │ Fully self-contained         │  "@playwright/mcp@latest"]'                   │
+│     │ ✅ Recommended default       │ Use same version as Cursor (e.g. @0.0.70)     │
 ├─────┼──────────────────────────────┼───────────────────────────────────────────────┤
 │  3  │ Standalone — local DOM       │ Set neither of the above                      │
 │     │ No browser needed            │ Works offline, works in CI, less accurate     │
@@ -683,7 +684,9 @@ LIMS picks a runtime validation mode automatically based on what is configured. 
 └─────┴──────────────────────────────┴───────────────────────────────────────────────┘
 ```
 
-If playwright-mcp is configured but unreachable (not installed, crashed, timeout), LIMS catches the error and falls back to Mode 3 automatically. It never crashes on startup.
+> **Common mistake:** Setting `LIMS_PLAYWRIGHT_MCP_COMMAND="playwright-mcp"` (bare binary name) fails unless `playwright-mcp` is installed globally via `npm install -g @playwright/mcp`. Use `npx` instead — it works everywhere without a global install.
+
+If Playwright MCP is configured but unreachable (wrong command, timeout, crash), LIMS catches the error and falls back to Mode 3 automatically. It never crashes on startup.
 
 ---
 

@@ -128,7 +128,7 @@ Check the mode with `health_check`.
 | Mode | Set via | How it works |
 |---|---|---|
 | **`playwright-mcp` (HTTP)** | `LIMS_PLAYWRIGHT_MCP_URL=http://localhost:8931` | Connects to a shared, already-running playwright-mcp HTTP server. Both Cursor and LIMS share one browser. |
-| **`playwright-mcp` (stdio)** | `LIMS_PLAYWRIGHT_MCP_COMMAND=playwright-mcp` | LIMS spawns its own isolated playwright-mcp subprocess. Fully self-contained. |
+| **`playwright-mcp` (stdio)** | `LIMS_PLAYWRIGHT_MCP_COMMAND=npx` + `LIMS_PLAYWRIGHT_MCP_ARGS='["-y","@playwright/mcp@latest"]'` | LIMS spawns its own isolated playwright-mcp subprocess via npx. Fully self-contained. Use `npx` not bare `playwright-mcp` binary. |
 | **`http-bridge`** | `LIMS_PLAYWRIGHT_AUTO_BRIDGE=true` OR `LIMS_PLAYWRIGHT_VALIDATOR_URL` | HTTP endpoint for validation. Used when no MCP adapter is configured. |
 | **`local-fallback`** | _(none of the above)_ | Cheerio/XPath heuristics on static HTML. No browser. Good for offline use. |
 

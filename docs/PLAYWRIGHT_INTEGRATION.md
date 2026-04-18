@@ -61,24 +61,38 @@ Best when you want fewer processes and shared browser state.
 
 **Requires:** Start `playwright-mcp --port 8931` separately before launching Cursor/LIMS.
 
-### Mode 2: stdio subprocess — LIMS spawns its own playwright-mcp
+### Mode 2: stdio subprocess — LIMS spawns its own playwright-mcp (recommended default)
 
 ```bash
-LIMS_PLAYWRIGHT_MCP_COMMAND="playwright-mcp"
-LIMS_PLAYWRIGHT_MCP_ARGS='["--headless","--isolated"]'
+LIMS_PLAYWRIGHT_MCP_COMMAND="npx"
+LIMS_PLAYWRIGHT_MCP_ARGS='["-y", "@playwright/mcp@latest"]'
 ```
 
 `PlaywrightMcpValidatorAdapter { mode: 'stdio' }` — uses `StdioClientTransport`.
 LIMS manages its own dedicated playwright-mcp process. Fully self-contained.
 Each LIMS server start spawns one subprocess.
 
+> **Important:** Use `"npx"` as the command, **not** `"playwright-mcp"`.
+> `playwright-mcp` as a bare binary requires a global `npm install -g @playwright/mcp`,
+> which most users do not have. `npx` works everywhere without a global install.
+>
+> Pin the same version Cursor uses to avoid browser compatibility mismatches:
+> ```bash
+> LIMS_PLAYWRIGHT_MCP_ARGS='["-y", "@playwright/mcp@0.0.70"]'
+> ```
+
 Optional extras:
 ```bash
-LIMS_PLAYWRIGHT_MCP_TOOL_NAME="validate_locator"   # override auto-discovered tool name
-LIMS_PLAYWRIGHT_MCP_CWD="/absolute/path"            # working directory for subprocess
-LIMS_PLAYWRIGHT_MCP_ENV='{"NODE_ENV":"test"}'       # extra env vars for subprocess
-LIMS_PLAYWRIGHT_MCP_TIMEOUT_MS="10000"              # per-call timeout (default: 10000)
+LIMS_PLAYWRIGHT_MCP_TOOL_NAME="validate_locator"     # override auto-discovered tool name
+LIMS_PLAYWRIGHT_MCP_CWD="/absolute/path"              # working directory for subprocess
+LIMS_PLAYWRIGHT_MCP_ENV='{"NODE_ENV":"test"}'         # extra env vars for subprocess
+LIMS_PLAYWRIGHT_MCP_TIMEOUT_MS="10000"                # per-call timeout (default: 10000)
 ```
+
+> **Tip — pin the same version as Cursor:** If Cursor uses `@playwright/mcp@0.0.70`,
+> set `LIMS_PLAYWRIGHT_MCP_ARGS='["-y","@playwright/mcp@0.0.70"]'` so both use
+> the same browser. Using `@latest` on one and a pinned version on the other can
+> cause browser/API mismatches.
 
 ### Mode 3: HTTP bridge — local /validate endpoint
 
@@ -128,15 +142,15 @@ No clone or build needed. Works on **Node 20 or 22**.
 {
   "mcpServers": {
     "Playwright": {
-      "command": "playwright-mcp",
-      "args": ["--headless", "--isolated"]
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
     },
     "LIMS": {
       "command": "npx",
       "args": ["-y", "lims-mcp"],
       "env": {
-        "LIMS_PLAYWRIGHT_MCP_COMMAND":      "playwright-mcp",
-        "LIMS_PLAYWRIGHT_MCP_ARGS":         "[\"--headless\",\"--isolated\"]",
+        "LIMS_PLAYWRIGHT_MCP_COMMAND":      "npx",
+        "LIMS_PLAYWRIGHT_MCP_ARGS":         "[\"-y\",\"@playwright/mcp@latest\"]",
         "LIMS_PLAYWRIGHT_AUTO_BRIDGE":      "false",
         "LIMS_LEARNING_ENABLED":            "true",
         "LIMS_ARTIFACTS_ENABLED":           "true",

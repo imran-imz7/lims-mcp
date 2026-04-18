@@ -33,7 +33,26 @@ export class HealthCheckService {
     const httpExpected = Boolean(this.config.playwrightValidatorUrl) || this.config.playwrightAutoBridge
 
     if (mcpExpected && runtimeMode !== 'playwright-mcp') {
-      issues.push('playwright MCP is configured but not active at runtime')
+      const cmd = this.config.playwrightMcpCommand ?? ''
+      const isBareBinary = cmd.length > 0 && cmd !== 'npx' && !cmd.includes('/')
+      if (isBareBinary) {
+        issues.push(
+          `playwright MCP is configured but not active at runtime — ` +
+          `LIMS_PLAYWRIGHT_MCP_COMMAND is set to "${cmd}" (a bare binary name). ` +
+          `This binary may not be installed globally. ` +
+          `Most setups use npx instead: set LIMS_PLAYWRIGHT_MCP_COMMAND="npx" and ` +
+          `LIMS_PLAYWRIGHT_MCP_ARGS="[\\"-y\\", \\"@playwright/mcp@latest\\"]" ` +
+          `(or pin the same version Cursor uses, e.g. @playwright/mcp@0.0.70).`,
+        )
+      } else {
+        issues.push(
+          `playwright MCP is configured but not active at runtime — ` +
+          `LIMS sees Playwright MCP in config, but it is not connected/usable at check time. ` +
+          `Ensure the command "${cmd}" is accessible and the process can start. ` +
+          `If you use npx in Cursor, set LIMS_PLAYWRIGHT_MCP_COMMAND="npx" and ` +
+          `LIMS_PLAYWRIGHT_MCP_ARGS="[\\"-y\\", \\"@playwright/mcp@latest\\"]".`,
+        )
+      }
     }
     if (!runtimeProbe.executed) {
       issues.push('runtime validation probe did not execute')
@@ -72,8 +91,10 @@ export class HealthCheckService {
       issues,
       warnings,
       config: {
-        playwrightMcpConfigured: Boolean(this.config.playwrightMcpCommand),
+        playwrightMcpConfigured: Boolean(this.config.playwrightMcpCommand || this.config.playwrightMcpUrl),
         playwrightMcpCommand: this.config.playwrightMcpCommand ?? null,
+        playwrightMcpArgs: this.config.playwrightMcpArgs.length ? this.config.playwrightMcpArgs : null,
+        playwrightMcpUrl: this.config.playwrightMcpUrl ?? null,
         playwrightMcpToolName: this.config.playwrightMcpToolName ?? null,
         playwrightHttpConfigured: Boolean(this.config.playwrightValidatorUrl),
         healthProfile: this.config.healthProfile,
